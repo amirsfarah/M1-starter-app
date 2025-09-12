@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-      runs-on: ubunto-latest
+      runs-on: ubuntu-latest
       steps:
         - name: Checkout
           uses: actions/checkout@v3
@@ -16,24 +16,24 @@ jobs:
           uses: appleboy/scp-actions@master
           with:
             host: ${{ secrets.EC2_HOST }}
-            username: ${{ secrets.EC2_USER}}
-            key: ${{ secrets.EC2_KEY}}
+            username: ${{ secrets.EC2_USER }}
+            key: ${{ secrets.EC2_KEY }}
             source: "."
-            Target: "/home/ubuntu/cpen321-tutorial"
+            target: "/home/ubuntu/cpen321-tutorial"
 
         - name: Rebuild and Deploy
           uses: appleboy/ssh-actions@master
           with:
             host: ${{ secrets.EC2_HOST }}
-            username: ${{ secrets.EC2_USER}}
-            key: ${{ secrets.EC2_KEY}}
-            script: 
+            username: ${{ secrets.EC2_USER }}
+            key: ${{ secrets.EC2_KEY }}
+            script: |
               cd /home/ubuntu/cpen321-tutorial
 
               # Write Secrets into .env
               cat > .env <<EOF
-              PORT=${{ secrets.PROD_PORT}}
-              MONGODB_URI=${{ secrets.PROD_DB_URI}}
+              PORT=${{ secrets.PROD_PORT }}
+              MONGODB_URI=${{ secrets.PROD_DB_URI }}
               EOF
 
               # Give .env permissions
