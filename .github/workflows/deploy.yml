@@ -18,7 +18,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           source: "."
-          target: "/home/ubuntu/cpen321-tutorial"
+          target: "/home/ubuntu/cpen321-m1"
 
       - name: Rebuild and Deploy
         uses: appleboy/ssh-action@master
@@ -27,7 +27,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           script: |
-            cd /home/ubuntu/cpen321-tutorial
+            cd /home/ubuntu/cpen321-m1/backend
 
             # Write Secrets into .env
             cat > .env <<EOF
