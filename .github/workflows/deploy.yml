@@ -33,6 +33,7 @@ jobs:
             cat > .env <<EOF
             PORT=${{ secrets.PROD_PORT }}
             MONGODB_URI=${{ secrets.PROD_DB_URI }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
             EOF
 
             # Give .env permissions
