@@ -23,6 +23,11 @@ interface UserInterface {
         @Header("Authorization") authHeader: String,
         @Body request: UpdateProfileRequest
     ): Response<ApiResponse<ProfileData>>
+
+    @DELETE("user/profile")     // Added a delete profile endpoint
+    suspend fun deleteProfile(
+        @Header("Authorization") authHeader: String
+    ): Response<ApiResponse<Unit>>
 }
 
 interface ImageInterface {

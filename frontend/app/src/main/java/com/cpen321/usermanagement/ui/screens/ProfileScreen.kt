@@ -98,6 +98,13 @@ fun ProfileScreen(
             },
             onDeleteDialogConfirm = {
                 dialogState = dialogState.copy(showDeleteDialog = false)
+                // Perform account deletion 
+                profileViewModel.deleteAccount(      
+                    onSuccess = {
+                        authViewModel.handleAccountDeletion() 
+                        actions.onAccountDeleted()
+                    }
+                )    
                 authViewModel.handleAccountDeletion()
                 actions.onAccountDeleted()
             },

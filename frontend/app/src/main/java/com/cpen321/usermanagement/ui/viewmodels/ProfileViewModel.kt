@@ -183,4 +183,28 @@ class ProfileViewModel @Inject constructor(
             }
         }
     }
+
+    fun deleteAccount(
+        onSuccess: () -> Unit = {},
+        onError: (String) -> Unit = {}
+        ) {
+            viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                isSavingProfile = true,
+                errorMessage = null,
+                successMessage = null
+            )
+
+            val result = profileRepository.deleteProfile()
+            if (result.isSuccess) {
+                // reset state on successful deletion
+                _uiState.value = ProfileUiState(successMessage = "Account deleted")
+                onSuccess()
+            } else {
+                val msg = result.exceptionOrNull()?.message ?: "Failed to delete account"
+                _uiState.value = _uiState.value.copy(isSavingProfile = false, errorMessage = msg)
+                onError(msg)
+            }
+        }
+    }
 }
