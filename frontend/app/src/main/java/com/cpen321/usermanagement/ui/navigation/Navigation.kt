@@ -24,6 +24,7 @@ import com.cpen321.usermanagement.ui.viewmodels.AuthViewModel
 import com.cpen321.usermanagement.ui.viewmodels.MainViewModel
 import com.cpen321.usermanagement.ui.viewmodels.NavigationViewModel
 import com.cpen321.usermanagement.ui.viewmodels.ProfileViewModel
+import com.cpen321.usermanagement.ui.viewmodels.TriviaCardViewModel
 
 object NavRoutes {
     const val LOADING = "loading"
@@ -47,6 +48,7 @@ fun AppNavigation(
     val authViewModel: AuthViewModel = hiltViewModel()
     val profileViewModel: ProfileViewModel = hiltViewModel()
     val mainViewModel: MainViewModel = hiltViewModel()
+    val triviaCardViewModel: TriviaCardViewModel = hiltViewModel()
 
     // Handle navigation events from NavigationStateManager
     LaunchedEffect(navigationEvent) {
@@ -63,6 +65,7 @@ fun AppNavigation(
         navController = navController,
         authViewModel = authViewModel,
         profileViewModel = profileViewModel,
+        triviaCardViewModel = triviaCardViewModel,
         mainViewModel = mainViewModel,
         navigationStateManager = navigationStateManager
     )
@@ -150,6 +153,7 @@ private fun AppNavHost(
     authViewModel: AuthViewModel,
     profileViewModel: ProfileViewModel,
     mainViewModel: MainViewModel,
+    triviaCardViewModel: TriviaCardViewModel,
     navigationStateManager: NavigationStateManager
 ) {
     NavHost(
@@ -178,6 +182,8 @@ private fun AppNavHost(
         composable(NavRoutes.MAIN) {
             MainScreen(
                 mainViewModel = mainViewModel,
+                triviaCardViewModel = triviaCardViewModel,
+                profileViewModel = profileViewModel,
                 onProfileClick = { navigationStateManager.navigateToProfile() }
             )
         }

@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -25,14 +26,19 @@ import androidx.compose.ui.text.font.FontWeight
 import com.cpen321.usermanagement.R
 import com.cpen321.usermanagement.ui.components.MessageSnackbar
 import com.cpen321.usermanagement.ui.components.MessageSnackbarState
+import com.cpen321.usermanagement.ui.components.TriviaCard
 import com.cpen321.usermanagement.ui.viewmodels.MainUiState
 import com.cpen321.usermanagement.ui.viewmodels.MainViewModel
 import com.cpen321.usermanagement.ui.theme.LocalFontSizes
 import com.cpen321.usermanagement.ui.theme.LocalSpacing
+import com.cpen321.usermanagement.ui.viewmodels.ProfileViewModel
+import com.cpen321.usermanagement.ui.viewmodels.TriviaCardViewModel
 
 @Composable
 fun MainScreen(
     mainViewModel: MainViewModel,
+    triviaCardViewModel: TriviaCardViewModel,
+    profileViewModel: ProfileViewModel,
     onProfileClick: () -> Unit
 ) {
     val uiState by mainViewModel.uiState.collectAsState()
@@ -40,6 +46,8 @@ fun MainScreen(
 
     MainContent(
         uiState = uiState,
+        triviaCardViewModel = triviaCardViewModel,
+        profileViewModel = profileViewModel,
         snackBarHostState = snackBarHostState,
         onProfileClick = onProfileClick,
         onSuccessMessageShown = mainViewModel::clearSuccessMessage
@@ -49,6 +57,8 @@ fun MainScreen(
 @Composable
 private fun MainContent(
     uiState: MainUiState,
+    triviaCardViewModel: TriviaCardViewModel,
+    profileViewModel: ProfileViewModel,
     snackBarHostState: SnackbarHostState,
     onProfileClick: () -> Unit,
     onSuccessMessageShown: () -> Unit,
@@ -67,7 +77,9 @@ private fun MainContent(
             )
         }
     ) { paddingValues ->
-        MainBody(paddingValues = paddingValues)
+        MainBody(paddingValues = paddingValues,
+            profileViewModel = profileViewModel,
+            triviaCardViewModel = triviaCardViewModel)
     }
 }
 
@@ -148,15 +160,26 @@ private fun MainSnackbarHost(
 @Composable
 private fun MainBody(
     paddingValues: PaddingValues,
+    profileViewModel: ProfileViewModel,
+    triviaCardViewModel: TriviaCardViewModel,
     modifier: Modifier = Modifier
 ) {
+    val profileUi = profileViewModel.uiState.collectAsState()
+    val hobbies = profileUi.value.selectedHobbies.toList()
+
+    LaunchedEffect(hobbies) {
+        if (hobbies.isNotEmpty()) {
+            triviaCardViewModel.loadNewQuestion(hobbies)
+        }
+    }
     Box(
         modifier = modifier
             .fillMaxSize()
             .padding(paddingValues),
         contentAlignment = Alignment.Center
     ) {
-        WelcomeMessage()
+        TriviaCard(triviaCardViewModel,
+            profileViewModel = profileViewModel)
     }
 }
 
