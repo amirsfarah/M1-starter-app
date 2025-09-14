@@ -24,7 +24,8 @@ class ProfileRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
     private val userInterface: UserInterface,
     private val hobbyInterface: HobbyInterface,
-    private val tokenManager: TokenManager
+    private val tokenManager: TokenManager,
+    private val imageInterface: ImageInterface
 ) : ProfileRepository {
 
     companion object {
@@ -60,10 +61,10 @@ class ProfileRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateProfile(name: String, bio: String): Result<User> {
+    override suspend fun updateProfile(name: String, bio: String, profilePicture: String): Result<User> {
         return try {
-            val updateRequest = UpdateProfileRequest(name = name, bio = bio)
-            val response = userInterface.updateProfile("", updateRequest) // Auth header is handled by interceptor
+            val updateRequest = UpdateProfileRequest(name = name, bio = bio, profilePicture = profilePicture)
+            val response = userInterface.updateProfile("", updateRequest)
             if (response.isSuccessful && response.body()?.data != null) {
                 Result.success(response.body()!!.data!!.user)
             } else {
@@ -90,7 +91,7 @@ class ProfileRepositoryImpl @Inject constructor(
     override suspend fun updateUserHobbies(hobbies: List<String>): Result<User> {
         return try {
             val updateRequest = UpdateProfileRequest(hobbies = hobbies)
-            val response = userInterface.updateProfile("", updateRequest) // Auth header is handled by interceptor
+            val response = userInterface.updateProfile("", updateRequest)
             if (response.isSuccessful && response.body()?.data != null) {
                 Result.success(response.body()!!.data!!.user)
             } else {
@@ -115,9 +116,43 @@ class ProfileRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun uploadProfilePicture(pictureUri: Uri): Result<String> {
+        return try {
+            val file = uriToFile(context, pictureUri)
+            val requestFile = file.asRequestBody("image/*".toMediaType())
+            val body = MultipartBody.Part.createFormData("media", file.name, requestFile)
+            val res = imageInterface.uploadPicture("", body)
+            if (res.isSuccessful) {
+                Result.success(res.body()!!.data!!.image)
+            } else {
+                val errorBodyString = res.errorBody()?.string()
+                val errorMessage =
+                    parseErrorMessage(errorBodyString, "Failed to upload profile picture.")
+                Log.e(TAG, "Failed to upload profile picture: $errorMessage")
+                Result.failure(Exception(errorMessage))
+
+            }
+        } catch (e: java.net.SocketTimeoutException) {
+            Log.e(TAG, "Network timeout while uploading profile picture", e)
+            Result.failure(e)
+        } catch (e: java.net.UnknownHostException) {
+            Log.e(TAG, "Network connection failed while uploading profile picture", e)
+            Result.failure(e)
+        } catch (e: java.io.IOException) {
+            Log.e(TAG, "IO error while uploading profile picture", e)
+            Result.failure(e)
+        } catch (e: retrofit2.HttpException) {
+            Log.e(TAG, "HTTP error while uploading profile picture: ${e.code()}", e)
+            Result.failure(e)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error while uploading profile picture", e)
+            Result.failure(e)
+        }
+    }
+
     override suspend fun getAvailableHobbies(): Result<List<String>> {
         return try {
-            val response = hobbyInterface.getAvailableHobbies("") // Auth header is handled by interceptor
+            val response = hobbyInterface.getAvailableHobbies("")
             if (response.isSuccessful && response.body()?.data != null) {
                 Result.success(response.body()!!.data!!.hobbies)
             } else {
